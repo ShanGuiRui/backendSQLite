@@ -1,0 +1,68 @@
+# ==================== 基础应用配置 ====================
+spring:
+  application:
+    name: backend
+  main:
+    # 允许 Bean 定义覆盖
+    allow-bean-definition-overriding: true
+
+  # ==================== 数据源配置 ====================
+  datasource:
+    # SQLite JDBC 驱动类名
+    driver-class-name: org.sqlite.JDBC
+    # SQLite 数据库文件路径（相对于项目根目录）
+    url: jdbc:sqlite:file:./data/supermarket.db
+  sql:
+    # 数据库初始化模式（never/always/embedded）
+    init:
+      mode: never
+
+  # ==================== 日期时间格式配置 ====================
+  jackson:
+    # JSON 日期格式
+    date-format: yyyy-MM-dd
+    # JSON 时区
+    time-zone: GMT+8
+    serialization:
+      # 是否将日期转换为时间戳（false 表示不转换）
+      write-dates-as-timestamps: false
+  mvc:
+    # Spring MVC 日期格式
+    format:
+      date: yyyy-MM-dd
+
+  # ==================== 静态资源配置 ====================
+  web:
+    resources:
+      # 静态文件位置，指向前端 dist 文件夹
+      static-locations: file:./frontend/dist/
+
+  # ==================== 安全配置 ====================
+  security:
+    filter:
+      order: 0
+
+# ==================== 服务器配置 ====================
+server:
+  servlet:
+    # 应用上下文路径
+    context-path: /
+
+# ==================== MyBatis-Plus 配置 ====================
+mybatis-plus:
+  # Mapper XML 文件位置
+  mapper-locations: classpath:mapper/*.xml
+  # 实体类包路径
+  type-aliases-package: com.xinrui.entity
+  configuration:
+    # MyBatis-Plus 数据库类型标识
+    database-id: sqlite
+    # 开启下划线转驼峰命名
+    map-underscore-to-camel-case: true
+
+# ==================== JWT 配置 ====================
+jwt:
+  # JWT 密钥（生产环境请修改）
+  secret: your-secret-key-change-in-production
+  # JWT 过期时间（毫秒）
+  expiration: 86400000
