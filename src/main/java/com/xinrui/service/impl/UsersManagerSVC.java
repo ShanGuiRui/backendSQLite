@@ -4,6 +4,7 @@ import com.xinrui.entity.Users;
 import com.xinrui.mapper.UsersMapper;
 import com.xinrui.service.IUsersManagerSVC;
 import com.xinrui.utils.JwtUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,11 @@ public class UsersManagerSVC implements IUsersManagerSVC {
      */
     @Override
     public String login(String username, String password) {
-        Users users = usersMapper.findByUsername(username);
+        // 使用QueryWrapper构建查询条件
+        QueryWrapper<Users> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", username);
+        Users users = usersMapper.selectOne(queryWrapper);
+
         if (users != null && passwordEncoder.matches(password, users.getPassword())) {
             return jwtUtil.generateToken(users.getUsername(), users.getRole());
         }
@@ -39,14 +44,18 @@ public class UsersManagerSVC implements IUsersManagerSVC {
      */
     @Override
     public boolean register(String username, String password) {
-        if (usersMapper.findByUsername(username) != null) {
+        // 使用QueryWrapper检查用户是否存在
+        QueryWrapper<Users> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", username);
+        Long count = usersMapper.selectCount(queryWrapper);
+
+        if (count > 0) {
             return false;
         }
         Users users = new Users();
         users.setUsername(username);
         users.setPassword(passwordEncoder.encode(password));
         users.setRole("USER");
-        usersMapper.insert(users);
-        return true;
+    return usersMapper.insert(users) > 0;
     }
 }
