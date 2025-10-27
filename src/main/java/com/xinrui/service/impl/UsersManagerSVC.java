@@ -1,10 +1,10 @@
 package com.xinrui.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xinrui.entity.Users;
 import com.xinrui.mapper.UsersMapper;
 import com.xinrui.service.IUsersManagerSVC;
 import com.xinrui.utils.JwtUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,11 +17,12 @@ public class UsersManagerSVC implements IUsersManagerSVC {
     private JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    /// 使用Spring Security提供的BCryptPasswordEncoder提供的密码服务：
+    /// 将users.setPassword(password);替换为users.setPassword(passwordEncoder.encode(password));
+    /// 将password.equals(users.getPassword())替换为passwordEncoder.matches(password, users.getPassword())
+
     /**
      * 用户登录
-     * @param username
-     * @param password
-     * @return
      */
     @Override
     public String login(String username, String password) {
@@ -29,8 +30,7 @@ public class UsersManagerSVC implements IUsersManagerSVC {
         QueryWrapper<Users> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", username);
         Users users = usersMapper.selectOne(queryWrapper);
-
-        if (users != null && passwordEncoder.matches(password, users.getPassword())) {
+        if (users != null && password.equals(users.getPassword())) {
             return jwtUtil.generateToken(users.getUsername(), users.getRole());
         }
         return null;
@@ -38,9 +38,6 @@ public class UsersManagerSVC implements IUsersManagerSVC {
 
     /**
      * 用户注册
-     * @param username
-     * @param password
-     * @return
      */
     @Override
     public boolean register(String username, String password) {
@@ -54,7 +51,7 @@ public class UsersManagerSVC implements IUsersManagerSVC {
         }
         Users users = new Users();
         users.setUsername(username);
-        users.setPassword(passwordEncoder.encode(password));
+        users.setPassword(password);
         users.setRole("USER");
     return usersMapper.insert(users) > 0;
     }

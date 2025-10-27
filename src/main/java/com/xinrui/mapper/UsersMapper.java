@@ -10,9 +10,4 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface UsersMapper extends BaseMapper<Users> {
-    /**
-     * 根据用户名查询用户信息
-     * @param username 用户名
-     * @return 返回匹配的用户对象，如果没有找到则返回null
-     */
 }
