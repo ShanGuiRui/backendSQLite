@@ -2,7 +2,6 @@ package com.xinrui.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xinrui.entity.GoodsType;
-import com.xinrui.manager.c2s.C2sGoodsTypeManager;
 import com.xinrui.manager.s2c.S2cGoodsTypeManager;
 import com.xinrui.mapper.GoodsTypeMapper;
 import com.xinrui.service.IGoodsTypeManagerSVC;
@@ -27,7 +26,7 @@ public class GoodsTypeManagerSVC implements IGoodsTypeManagerSVC {
     public List<S2cGoodsTypeManager> getGoodsType(GoodsType goodsType) {
         QueryWrapper<GoodsType> queryWrapper = new QueryWrapper<>();
 
-        // 可选状态过滤
+        // isuse状态过滤
         if (goodsType.getIsuse() != null) {
             queryWrapper.eq("isuse", goodsType.getIsuse());
         }

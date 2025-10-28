@@ -49,7 +49,7 @@ public class GoodsManagerSVC implements IGoodsManagerSVC {
         if (c2sGoodsQuery.getTypeId() != null) {
             queryWrapper.eq("type_id", c2sGoodsQuery.getTypeId());
         }
-        // keyword整合模糊搜索
+        // 整合keyword模糊搜索
         if (c2sGoodsQuery.getKeyword() != null){
             String keyword = c2sGoodsQuery.getKeyword();
             queryWrapper.and(wrapper -> wrapper
