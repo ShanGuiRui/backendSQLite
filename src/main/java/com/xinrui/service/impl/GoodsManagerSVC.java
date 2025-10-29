@@ -3,11 +3,14 @@ package com.xinrui.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xinrui.entity.Goods;
 import com.xinrui.entity.GoodsType;
+import com.xinrui.entity.Supplier;
 import com.xinrui.manager.c2s.*;
 import com.xinrui.manager.s2c.S2cGoodsManager;
 import com.xinrui.manager.s2c.S2cSettlement;
+import com.xinrui.manager.s2c.S2cStockIn;
 import com.xinrui.mapper.GoodsMapper;
 import com.xinrui.mapper.GoodsTypeMapper;
+import com.xinrui.mapper.SupplierMapper;
 import com.xinrui.service.IGoodsManagerSVC;
 import com.xinrui.utils.Page;
 import org.springframework.beans.BeanUtils;
@@ -24,6 +27,8 @@ public class GoodsManagerSVC implements IGoodsManagerSVC {
     private GoodsMapper goodsMapper;
     @Autowired
     private GoodsTypeMapper goodsTypeMapper;
+    @Autowired
+    private SupplierMapper supplierMapper;
 
     /**
      * 获取商品
@@ -234,6 +239,94 @@ public class GoodsManagerSVC implements IGoodsManagerSVC {
             message += "，自动拆包" + autoUnboxResults.size() + "次";
         }
         response.setMessage(message);
+
+        return response;
+    }
+
+    /**
+     * 商品进货实现
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public S2cStockIn stockIn(C2sStockIn c2sStockIn) {
+        float totalAmount = 0f;
+        List<Goods> goodsList = new ArrayList<>();
+
+        // 处理可选参数：若c2sStockIn为null，初始化默认实例
+        if (c2sStockIn == null) {
+            c2sStockIn = new C2sStockIn();
+        }
+        // 处理items为null的情况，避免空指针
+        if (c2sStockIn.getItems() == null) {
+            c2sStockIn.setItems(new ArrayList<>());
+        }
+
+        // 校验进货商品列表不能为空
+        if (c2sStockIn.getItems().isEmpty()) {
+            throw new RuntimeException("进货商品列表不能为空");
+        }
+        // 1. 校验供应商是否存在（supplierId为可选参数）
+        if (c2sStockIn.getSupplierId() != null) {
+            Supplier supplier = supplierMapper.selectById(c2sStockIn.getSupplierId());
+            if (supplier == null) {
+                throw new RuntimeException("供应商不存在: " + c2sStockIn.getSupplierId());
+            }
+        }
+        // 2. 校验商品并准备更新数据（处理进货单价为空的情况）
+        for (C2sStockInItem item : c2sStockIn.getItems()) {
+            if (item == null) {
+                throw new RuntimeException("进货商品项不能为null");
+            }
+            if (item.getGoodsId() == null) {
+                throw new RuntimeException("商品ID不能为空");
+            }
+
+            Goods goods = goodsMapper.selectById(item.getGoodsId());
+            if (goods == null) {
+                throw new RuntimeException("商品不存在: " + item.getGoodsId());
+            }
+            if (item.getQuantity() == null || item.getQuantity() <= 0) {
+                throw new RuntimeException("进货数量必须大于0: " + goods.getName());
+            }
+
+            if (item.getPurPrice() != null && item.getPurPrice() <= 0) {
+                // 仅当单价不为空且<=0时才抛异常（为空时后续会用数据库值）
+                throw new RuntimeException("进货单价必须大于0: " + goods.getName());
+            }
+
+            goodsList.add(goods);
+        }
+        // 3. 更新库存和进货价（使用默认进价逻辑）
+        for (int i = 0; i < c2sStockIn.getItems().size(); i++) {
+            C2sStockInItem item = c2sStockIn.getItems().get(i);
+            Goods goods = goodsList.get(i);
+
+            // 计算实际使用的进货价：优先用传入的单价，为空则用数据库现有值
+            float actualPurPrice = (item.getPurPrice() != null) ? item.getPurPrice() : goods.getPurPrice();
+
+            // 更新库存（累加）
+            goods.setStock(goods.getStock() + item.getQuantity());
+            // 更新进货价（若传入了新单价则更新，否则保持数据库原有值）
+            if (item.getPurPrice() != null) {
+                goods.setPurPrice(actualPurPrice);
+            }
+            // 重新计算利润（无论是否更新进价，都基于当前实际进价计算）
+            if (goods.getPrice() != null) {
+                goods.setProfit(goods.getPrice() - actualPurPrice);
+            }
+            // 关联供应商（可选参数）
+            goods.setSupplierId(c2sStockIn.getSupplierId());
+
+            goodsMapper.updateById(goods);
+
+            // 计算总进货金额（基于实际使用的进价）
+            totalAmount += actualPurPrice * item.getQuantity();
+        }
+
+        // 4. 构建响应
+        S2cStockIn response = new S2cStockIn();
+        response.setTotalAmount(totalAmount);
+        response.setMessage("进货成功，共" + c2sStockIn.getItems().size() + "件商品，总金额：" + totalAmount);
 
         return response;
     }

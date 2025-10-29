@@ -20,7 +20,7 @@ public class Goods {
      */
     private Integer isuse;
     /**
-     * 分类id
+     * 分类id（关联商品分类）
      */
     private Integer typeId;
     /**
@@ -75,4 +75,8 @@ public class Goods {
      * 转换比
      */
     private Integer zhuanHuanBi;
+    /**
+     * 供应商ID（关联进货来源）
+     */
+    private Integer supplierId;
 }

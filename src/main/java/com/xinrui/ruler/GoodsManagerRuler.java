@@ -4,8 +4,10 @@ import com.xinrui.entity.Goods;
 import com.xinrui.manager.c2s.C2sGoodsManager;
 import com.xinrui.manager.c2s.C2sGoodsQuery;
 import com.xinrui.manager.c2s.C2sSettlement;
+import com.xinrui.manager.c2s.C2sStockIn;
 import com.xinrui.manager.s2c.S2cGoodsManager;
 import com.xinrui.manager.s2c.S2cSettlement;
+import com.xinrui.manager.s2c.S2cStockIn;
 import com.xinrui.service.IGoodsManagerSVC;
 import com.xinrui.utils.ApiResult;
 import com.xinrui.utils.Page;
@@ -95,6 +97,22 @@ public class GoodsManagerRuler {
     @PostMapping("/settlement")
     public ApiResult settlement(@RequestBody C2sSettlement c2sSettlement) {
         S2cSettlement result = goodsSVC.settlement(c2sSettlement);
+        return ApiResult.success()
+                .setData(result)
+                .set("totalAmount", result.getTotalAmount());
+    }
+
+    /**
+     * 商品进货
+     * @param c2sStockIn 进货请求
+     * @return 进货结果
+     */
+    @PostMapping("/stockIn")
+    public ApiResult stockIn(@RequestBody C2sStockIn c2sStockIn) {
+        if (c2sStockIn == null || c2sStockIn.getItems() == null || c2sStockIn.getItems().isEmpty()) {
+            return ApiResult.error("进货商品列表不能为空");
+        }
+        S2cStockIn result = goodsSVC.stockIn(c2sStockIn);
         return ApiResult.success()
                 .setData(result)
                 .set("totalAmount", result.getTotalAmount());
