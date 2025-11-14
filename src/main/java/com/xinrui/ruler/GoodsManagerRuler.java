@@ -48,7 +48,7 @@ public class GoodsManagerRuler {
     }
 
     /**
-     * 商品的增删改
+     * 商品的增加/禁用/修改
      * @param c2sGoodsManager
      * @return
      */
@@ -57,6 +57,20 @@ public class GoodsManagerRuler {
         Goods goods = new Goods();
         BeanUtils.copyProperties(c2sGoodsManager, goods);
         goodsSVC.publishGoods(goods);
+        return ApiResult.success()
+                .setData(0);
+    }
+
+    /**
+     * 商品的删除
+     * @param c2sGoodsManager
+     * @return
+     */
+    @PostMapping("/deleteGoods")
+    public ApiResult deleteGoods(@RequestBody C2sGoodsManager c2sGoodsManager){
+        Goods goods = new Goods();
+        BeanUtils.copyProperties(c2sGoodsManager, goods);
+        goodsSVC.deleteGoods(goods);
         return ApiResult.success()
                 .setData(0);
     }

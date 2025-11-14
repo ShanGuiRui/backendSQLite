@@ -18,10 +18,16 @@ public interface IGoodsManagerSVC {
     List<S2cGoodsManager> getGoods(C2sGoodsQuery c2sGoodsQuery);
 
     /**
-     * 商品的增删改
+     * 商品的增加/禁用/修改
      * @param goods
      */
     void publishGoods(Goods goods);
+
+    /**
+     * 商品的删除
+     * @param goods
+     */
+    void deleteGoods(Goods goods);
 
     /**
      * 商品拆包 - 获取子包装

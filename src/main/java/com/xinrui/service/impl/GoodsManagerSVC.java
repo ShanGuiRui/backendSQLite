@@ -93,7 +93,7 @@ public class GoodsManagerSVC implements IGoodsManagerSVC {
 
 
     /**
-     * 商品的增删改
+     * 商品的增加/禁用/修改
      * @param goods
      */
     @Override
@@ -110,6 +110,16 @@ public class GoodsManagerSVC implements IGoodsManagerSVC {
         } else {
             goodsMapper.updateById(goods);
         }
+    }
+
+    /**
+     * 商品的删除
+     * @param goods
+     */
+    @Override
+    @Transactional
+    public void deleteGoods(Goods goods) {
+        goodsMapper.deleteById(goods.getId());
     }
 
     /**
@@ -244,6 +254,7 @@ public class GoodsManagerSVC implements IGoodsManagerSVC {
     }
 
     /**
+     * todo: 进货方法需要重新设计，原方法暂时废弃；供应商管理页面待实现；商品、分类管理可以加删除（实际删）；可以加个用户管理页面，实现修改用户名、密码、权限及禁用、删除用户等操作
      * 商品进货实现
      */
     @Override
@@ -357,6 +368,29 @@ public class GoodsManagerSVC implements IGoodsManagerSVC {
                 .collect(Collectors.toMap(
                         goodsType -> goodsType.getTypeId(),  // Integer类型
                         goodsType -> goodsType.getTypeName(),
+                        (oldValue, newValue) -> oldValue));  // 如果有重复key，保留旧值
+    }
+
+    private Map<Integer, String> getSupplierNameMap(List<Goods> goodsList) {
+        // 收集所有涉及的供应商ID
+        List<Integer> supplierIds = goodsList.stream()
+                .map(goods -> goods.getSupplierId())
+                .filter(Objects::nonNull)  // 过滤掉null的supplierId
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (supplierIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        // 批量查询供应商信息
+        List<Supplier> suppliers = supplierMapper.selectBatchIds(supplierIds);
+
+        // 构建供应商ID到供应商名的映射
+        return suppliers.stream()
+                .collect(Collectors.toMap(
+                        supplier -> supplier.getId(),  // Integer类型
+                        supplier -> supplier.getName(),
                         (oldValue, newValue) -> oldValue));  // 如果有重复key，保留旧值
     }
 

@@ -1,7 +1,6 @@
 package com.xinrui.service;
 
 import com.xinrui.entity.GoodsType;
-import com.xinrui.manager.c2s.C2sGoodsTypeManager;
 import com.xinrui.manager.s2c.S2cGoodsTypeManager;
 
 import java.util.List;
@@ -15,8 +14,14 @@ public interface IGoodsTypeManagerSVC {
     List<S2cGoodsTypeManager> getGoodsType(GoodsType goodsType);
 
     /**
-     * 分类的增删改
+     * 分类的增加/禁用/修改
      * @param goodsType
      */
     void publishGoodsType(GoodsType goodsType);
+
+    /**
+     * 删除分类
+     * @param goodsType
+     */
+    void deleteGoodsType(GoodsType goodsType);
 }

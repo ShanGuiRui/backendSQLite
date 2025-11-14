@@ -43,7 +43,7 @@ public class GoodsTypeManagerSVC implements IGoodsTypeManagerSVC {
     }
 
     /**
-     * 分类的增删改
+     * 分类的增加/禁用/修改
      * @param goodsType
      */
     @Override
@@ -53,6 +53,15 @@ public class GoodsTypeManagerSVC implements IGoodsTypeManagerSVC {
             return;
         }
         goodsTypeMapper.updateById(goodsType);
+    }
+
+    /**
+     * 删除分类
+     * @param goodsType
+     */
+    @Override
+    public void deleteGoodsType(GoodsType goodsType) {
+        goodsTypeMapper.deleteById(goodsType.getTypeId());
     }
 
 }

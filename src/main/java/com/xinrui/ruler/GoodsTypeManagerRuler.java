@@ -35,7 +35,7 @@ public class GoodsTypeManagerRuler {
     }
 
     /**
-     * 分类的增删改
+     * 分类的增加/禁用/修改
      * @param c2sGoodsTypeManager
      * @return
      */
@@ -44,6 +44,20 @@ public class GoodsTypeManagerRuler {
         GoodsType goodsType = new GoodsType();
         BeanUtils.copyProperties(c2sGoodsTypeManager, goodsType);
         goodsTypeSVC.publishGoodsType(goodsType);
+        return ApiResult.success()
+                .setData(0);
+    }
+
+    /**
+     * 删除分类
+     * @param c2sGoodsTypeManager
+     * @return
+     */
+    @PostMapping("/deleteGoodsType")
+    public ApiResult deleteGoodsType(@RequestBody C2sGoodsTypeManager c2sGoodsTypeManager){
+        GoodsType goodsType = new GoodsType();
+        BeanUtils.copyProperties(c2sGoodsTypeManager, goodsType);
+        goodsTypeSVC.deleteGoodsType(goodsType);
         return ApiResult.success()
                 .setData(0);
     }
